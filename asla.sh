@@ -32,10 +32,12 @@
 VERSION="1.0"
 REPO="https://github.com/giuseppetotaro/asla"
 TOOLS=("cp" "rsync")
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 OUT_FILE=
 LOG_FILE=
 ERR_FILE=
 VOLUME_NAME=
+VOLUME_NAME_FILE=$(mktemp /tmp/.VOLUME_NAME-XXXX)
 
 # Functions
 
@@ -49,11 +51,15 @@ VOLUME_NAME=
 #   Writes error message to stdout.
 #######################################
 cleanup() {
+  local volname=$(cat "${VOLUME_NAME_FILE}" 2>/dev/null)
+  rm -f "${VOLUME_NAME_FILE}"
   echo "# An error occurred. Cleaning up..."
-  [[ -d "${VOLUME_NAME}" ]] && detach_image "${VOLUME_NAME}"
+  [[ -d "${volname}" ]] && detach_image "${volname}"
   echo "# Process has been terminated with errors."
   echo "# Check manually if target has been mounted anyway and, if so, unmount it."
 }
+
+trap cleanup EXIT
 
 #######################################
 # Print help message.
@@ -254,6 +260,7 @@ EOF
   # the same name already exists. This is to get the actual volume name from the
   # output of the hdiutil command.
   VOLUME_NAME=$(echo "${out}" | sed -rn 's/.+(\/Volumes\/.+[^[:space:]]).*/\1/p' | head -1)
+  echo "${VOLUME_NAME}" > "${VOLUME_NAME_FILE}"
 }
 
 #######################################
@@ -398,7 +405,7 @@ EOF
 run_process() {
   print_acquisition_info "${target}" "${destination}" "${image_name}" "${tool}"
   create_sparse_image "${size}" "${destination}" "${image_name}" "${target}"
-  trap cleanup EXIT
+  #trap cleanup EXIT
   acquire_data "${target}" "${VOLUME_NAME}" "${tool}"
   detach_image "${VOLUME_NAME}"
   print_summary "${start_datetime}" "${destination}" "${image_name}" "${hash}"
