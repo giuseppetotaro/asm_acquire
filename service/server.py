@@ -13,8 +13,8 @@ def command(verb):
 @app.route('/start', methods=['POST'])
 def start_process():
     data = request.get_json()
-    if 'identifier' not in data:  # identifier is not used yet!
-        return jsonify({'message': 'Indentifier not provided.'}), 400
+    if 'image_name' not in data:  # image_name is not used yet!
+        return jsonify({'message': 'Image name not provided.'}), 400
     response, status_code = command('start')
     return jsonify(response), status_code
 
@@ -29,4 +29,4 @@ def get_status():
     return jsonify(response), status_code
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host='0.0.0.0', debug=True)

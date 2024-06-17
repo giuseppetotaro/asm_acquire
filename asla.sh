@@ -59,7 +59,7 @@ cleanup() {
   echo "# Check manually if target has been mounted anyway and, if so, unmount it."
 }
 
-trap cleanup EXIT
+trap cleanup INT
 
 #######################################
 # Print help message.

@@ -50,7 +50,7 @@ process_start() {
   else
     cmd="screen -S ${SCREEN_SESSION} -d -m bash -c '${SCRIPT_PATH} -a -n \"${computer_name}\" -u Guest --no-password \"${target}\" \"${dest}\"'"
     eval $cmd
-    printf "# %s started in %s.\n" "${SCRIPT_NAME}" "${SCREEN_SESSION}"
+    printf "# %s started in %s.\n" "${SCRIPT_NAME}" "${SCREEN_SESSION}"  # Commentary: it actually doesn't check if any errors occurred!
   fi
 }
 
@@ -95,8 +95,9 @@ EOF
 process_stop() { 
   if screen -list | grep "${SCREEN_SESSION}" >/dev/null
   then
-    pkill -INT "SCREEN"  #TODO: Determine the PID in a more accurate way!
-    screen -S "${SCREEN_SESSION}" -X quit
+    #pkill -INT "SCREEN"  #TODO: Determine the PID in a more accurate way!
+    #screen -S "${SCREEN_SESSION}" -X quit
+    screen -S "${SCREEN_SESSION}" -p 0 -X stuff $'\003'
     printf "# %s stopped.\n" "${SCRIPT_NAME}"
   else
     printf "# %s is not running.\n" "${SCRIPT_NAME}"
